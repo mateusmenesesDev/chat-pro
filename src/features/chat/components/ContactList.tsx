@@ -1,11 +1,14 @@
+import { Plus } from "lucide-react";
 import { useState } from "react";
 import {
   Avatar,
   AvatarFallback,
   AvatarImage,
 } from "~/common/components/ui/avatar";
+import { Button } from "~/common/components/ui/button";
 import { Card } from "~/common/components/ui/card";
 import { Input } from "~/common/components/ui/input";
+import { AddContactDialog } from "./AddContactDialog";
 
 interface Contact {
   id: string;
@@ -20,14 +23,17 @@ interface ContactListProps {
   contacts: Contact[];
   selectedContactId?: string;
   onSelectContact: (contactId: string) => void;
+  onAddContact: (name: string) => void;
 }
 
 export function ContactList({
   contacts,
   selectedContactId,
   onSelectContact,
+  onAddContact,
 }: ContactListProps) {
   const [searchQuery, setSearchQuery] = useState("");
+  const [isAddContactOpen, setIsAddContactOpen] = useState(false);
 
   const filteredContacts = contacts.filter((contact) =>
     contact.name.toLowerCase().includes(searchQuery.toLowerCase()),
@@ -35,13 +41,23 @@ export function ContactList({
 
   return (
     <div className="flex h-full flex-col">
-      <div className="p-3">
-        <Input
-          placeholder="Search contacts..."
-          value={searchQuery}
-          onChange={(e) => setSearchQuery(e.target.value)}
-          className="bg-background/50"
-        />
+      <div className="flex items-center gap-2 p-3">
+        <div className="flex-1">
+          <Input
+            placeholder="Search contacts..."
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            className="bg-background/50"
+          />
+        </div>
+        <Button
+          size="icon"
+          variant="outline"
+          onClick={() => setIsAddContactOpen(true)}
+          className="shrink-0"
+        >
+          <Plus className="h-5 w-5" />
+        </Button>
       </div>
       <div className="flex-1 overflow-y-auto">
         {filteredContacts.map((contact) => (
@@ -89,6 +105,12 @@ export function ContactList({
           </Card>
         ))}
       </div>
+
+      <AddContactDialog
+        isOpen={isAddContactOpen}
+        onClose={() => setIsAddContactOpen(false)}
+        onAddContact={onAddContact}
+      />
     </div>
   );
 }

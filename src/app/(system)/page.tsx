@@ -45,6 +45,7 @@ export default function ChatInterface() {
   const [newMessage, setNewMessage] = useState("");
   const [isTyping, setIsTyping] = useState(false);
   const [selectedContactId, setSelectedContactId] = useState<string>();
+  const [contacts, setContacts] = useState(SAMPLE_CONTACTS);
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
   const currentUser = {
@@ -52,7 +53,7 @@ export default function ChatInterface() {
     avatar: "https://api.dicebear.com/7.x/avataaars/svg?seed=current",
   };
 
-  const selectedContact = SAMPLE_CONTACTS.find(
+  const selectedContact = contacts.find(
     (contact) => contact.id === selectedContactId,
   );
 
@@ -112,14 +113,27 @@ export default function ChatInterface() {
     }
   };
 
+  const handleAddContact = (name: string) => {
+    const newContact = {
+      id: (contacts.length + 1).toString(),
+      name,
+      avatar: `https://api.dicebear.com/7.x/avataaars/svg?seed=${name.toLowerCase().replace(/\s+/g, "")}`,
+      lastMessage: "New contact added",
+      lastMessageTime: new Date(),
+    };
+
+    setContacts((prev) => [...prev, newContact]);
+  };
+
   return (
     <div className="flex h-[calc(100vh-81px)]">
       {/* Contact List */}
       <div className="w-80 border-r">
         <ContactList
-          contacts={SAMPLE_CONTACTS}
+          contacts={contacts}
           selectedContactId={selectedContactId}
           onSelectContact={setSelectedContactId}
+          onAddContact={handleAddContact}
         />
       </div>
 

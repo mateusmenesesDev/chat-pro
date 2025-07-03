@@ -1,5 +1,3 @@
-import { Button } from "~/common/components/ui/button";
-
 export const EmptyState = () => {
   return (
     <div className="animate-fade-in flex h-full flex-col items-center justify-center py-16">
@@ -25,18 +23,6 @@ export const EmptyState = () => {
         <span className="font-medium">the ChatPro</span>. Send a message to get
         started!
       </p>
-
-      <div className="mt-8 grid w-full max-w-xs grid-cols-1 gap-3">
-        <Button variant="secondary" size="lg" className="py-7">
-          👋 Say hello
-        </Button>
-        <Button variant="secondary" size="lg" className="py-7">
-          💼 Share an update
-        </Button>
-        <Button variant="secondary" size="lg" className="py-7">
-          🤔 Ask a question
-        </Button>
-      </div>
     </div>
   );
 };
