@@ -19,27 +19,27 @@
   --color-background: hsl(0 0% 99%);
   --color-foreground: hsl(225 15% 20%);
 
-  /* Premium Surface Colors */
+  /* Surface Colors */
   --color-card: hsl(0 0% 100%);
   --color-card-foreground: hsl(225 15% 20%);
 
   --color-popover: hsl(0 0% 100%);
   --color-popover-foreground: hsl(225 15% 20%);
 
-  /* Sophisticated Primary Purple */
+  /* Primary Purple */
   --color-primary: hsl(262 83% 58%);
   --color-primary-foreground: hsl(0 0% 100%);
   --color-primary-glow: hsl(262 83% 68%);
 
-  /* Elegant Secondary */
+  /* Secondary */
   --color-secondary: hsl(220 14% 96%);
   --color-secondary-foreground: hsl(225 15% 20%);
 
-  /* Subtle Muted Tones */
+  /* Muted Tones */
   --color-muted: hsl(220 14% 96%);
   --color-muted-foreground: hsl(220 9% 46%);
 
-  /* Refined Accent */
+  /* Accent */
   --color-accent: hsl(220 14% 96%);
   --color-accent-foreground: hsl(225 15% 20%);
 
@@ -80,8 +80,8 @@
   --color-chart-5: hsl(27 87% 67%);
 }
 
-@media (prefers-color-scheme: dark) {
-  @theme {
+@layer theme {
+  .dark {
     /* Dark Mode Core */
     --color-background: hsl(222 47% 8%);
     --color-foreground: hsl(220 14% 96%);
@@ -93,7 +93,7 @@
     --color-popover: hsl(225 25% 11%);
     --color-popover-foreground: hsl(220 14% 96%);
 
-    /* Dark Primary (keeps the purple) */
+    /* Dark Primary */
     --color-primary: hsl(262 83% 68%);
     --color-primary-foreground: hsl(0 0% 100%);
     --color-primary-glow: hsl(262 83% 78%);

@@ -1,5 +1,6 @@
 import { auth } from "@clerk/nextjs/server";
 import { redirect } from "next/navigation";
+import Header from "~/common/components/Header";
 
 export default async function layout({
   children,
@@ -11,5 +12,10 @@ export default async function layout({
     redirect("/login");
   }
 
-  return <main>{children}</main>;
+  return (
+    <main>
+      <Header />
+      {children}
+    </main>
+  );
 }
