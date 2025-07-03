@@ -9,10 +9,10 @@ import {
 import { Button } from "~/common/components/ui/button";
 import { Card } from "~/common/components/ui/card";
 import { Input } from "~/common/components/ui/input";
-import { ContactList } from "~/features/chat/components/ContactList";
 import { EmptyState } from "~/features/chat/components/EmptyState";
 import { MessageBubble } from "~/features/chat/components/MessageBubble";
 import type { Message } from "~/features/chat/types/Message";
+import { ContactList } from "~/features/contact/components/ContactList";
 
 // Sample contacts data
 const SAMPLE_CONTACTS = [

@@ -4,6 +4,7 @@ import { type Metadata } from "next";
 import { Geist } from "next/font/google";
 
 import { ClerkProvider } from "@clerk/nextjs";
+import { Toaster } from "sonner";
 import { ThemeProvider } from "~/common/providers/ThemeProvider";
 import { SEO } from "~/constants";
 import { TRPCReactProvider } from "~/trpc/react";
@@ -27,7 +28,10 @@ export default function RootLayout({
       <body>
         <ThemeProvider attribute="class" enableSystem disableTransitionOnChange>
           <ClerkProvider>
-            <TRPCReactProvider>{children}</TRPCReactProvider>
+            <TRPCReactProvider>
+              <Toaster richColors />
+              {children}
+            </TRPCReactProvider>
           </ClerkProvider>
         </ThemeProvider>
       </body>

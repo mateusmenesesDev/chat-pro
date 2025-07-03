@@ -1,8 +1,8 @@
 // Example model schema from the Drizzle docs
 // https://orm.drizzle.team/docs/sql-schema-declaration
 
-import { sql } from "drizzle-orm";
-import { index, pgTableCreator } from "drizzle-orm/pg-core";
+import { relations, sql } from "drizzle-orm";
+import { index, pgTableCreator, primaryKey } from "drizzle-orm/pg-core";
 
 /**
  * This is an example of how to use the multi-project schema feature of Drizzle ORM. Use the same
@@ -12,16 +12,39 @@ import { index, pgTableCreator } from "drizzle-orm/pg-core";
  */
 export const createTable = pgTableCreator((name) => `chat-pro_${name}`);
 
-export const posts = createTable(
-  "post",
+export const users = createTable("user", (d) => ({
+  id: d.text().primaryKey(),
+  name: d.varchar({ length: 256 }),
+  email: d.varchar({ length: 256 }),
+  createdAt: d
+    .timestamp({ withTimezone: true })
+    .default(sql`CURRENT_TIMESTAMP`)
+    .notNull(),
+}));
+
+export const contacts = createTable(
+  "contact",
   (d) => ({
-    id: d.integer().primaryKey().generatedByDefaultAsIdentity(),
-    name: d.varchar({ length: 256 }),
+    userId: d.text().references(() => users.id, { onDelete: "cascade" }),
+    contactId: d.text().references(() => users.id, { onDelete: "cascade" }),
     createdAt: d
       .timestamp({ withTimezone: true })
       .default(sql`CURRENT_TIMESTAMP`)
       .notNull(),
-    updatedAt: d.timestamp({ withTimezone: true }).$onUpdate(() => new Date()),
   }),
-  (t) => [index("name_idx").on(t.name)]
+  (table) => [
+    primaryKey({ columns: [table.userId, table.contactId] }),
+    index("idx_contacts_user_id").on(table.userId),
+  ],
 );
+
+export const contactsRelations = relations(contacts, ({ one }) => ({
+  user: one(users, {
+    fields: [contacts.userId],
+    references: [users.id],
+  }),
+  contact: one(users, {
+    fields: [contacts.contactId],
+    references: [users.id],
+  }),
+}));

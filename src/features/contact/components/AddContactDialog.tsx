@@ -1,4 +1,5 @@
-import { useState } from "react";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { useForm, type SubmitHandler } from "react-hook-form";
 import { Button } from "~/common/components/ui/button";
 import {
   Dialog,
@@ -9,33 +10,37 @@ import {
   DialogTitle,
 } from "~/common/components/ui/dialog";
 import { Input } from "~/common/components/ui/input";
+import { useContact } from "../hooks/useContact";
+import {
+  createContactSchema,
+  type CreateContact,
+} from "../schemas/Contact.schema";
 
 interface AddContactDialogProps {
   isOpen: boolean;
   onClose: () => void;
-  onAddContact: (email: string) => void;
 }
 
-export function AddContactDialog({
-  isOpen,
-  onClose,
-  onAddContact,
-}: AddContactDialogProps) {
-  const [email, setEmail] = useState("");
+export function AddContactDialog({ isOpen, onClose }: AddContactDialogProps) {
+  const {
+    register,
+    handleSubmit,
+    formState: { errors },
+  } = useForm<CreateContact>({
+    resolver: zodResolver(createContactSchema),
+  });
+  const { createContact } = useContact();
+  console.log(errors);
 
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (email.trim()) {
-      onAddContact(email.trim());
-      setEmail("");
-      onClose();
-    }
+  const onSubmit: SubmitHandler<CreateContact> = (data) => {
+    createContact(data);
+    onClose();
   };
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent>
-        <form onSubmit={handleSubmit}>
+        <form onSubmit={handleSubmit(onSubmit)}>
           <DialogHeader>
             <DialogTitle>Add New Contact</DialogTitle>
             <DialogDescription>
@@ -45,20 +50,20 @@ export function AddContactDialog({
 
           <div className="my-6">
             <Input
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
+              {...register("email")}
               placeholder="Contact email"
               className="w-full"
             />
+            <p className="text-destructive mt-2 text-sm">
+              {errors.email?.message}
+            </p>
           </div>
 
           <DialogFooter>
             <Button type="button" variant="outline" onClick={onClose}>
               Cancel
             </Button>
-            <Button type="submit" disabled={!email.trim()}>
-              Add Contact
-            </Button>
+            <Button type="submit">Add Contact</Button>
           </DialogFooter>
         </form>
       </DialogContent>
