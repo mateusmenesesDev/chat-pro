@@ -113,27 +113,13 @@ export default function ChatInterface() {
     }
   };
 
-  const handleAddContact = (name: string) => {
-    const newContact = {
-      id: (contacts.length + 1).toString(),
-      name,
-      avatar: `https://api.dicebear.com/7.x/avataaars/svg?seed=${name.toLowerCase().replace(/\s+/g, "")}`,
-      lastMessage: "New contact added",
-      lastMessageTime: new Date(),
-    };
-
-    setContacts((prev) => [...prev, newContact]);
-  };
-
   return (
     <div className="flex h-[calc(100vh-81px)]">
       {/* Contact List */}
       <div className="w-80 border-r">
         <ContactList
-          contacts={contacts}
           selectedContactId={selectedContactId}
           onSelectContact={setSelectedContactId}
-          onAddContact={handleAddContact}
         />
       </div>
 
