@@ -57,13 +57,13 @@ const t = initTRPC.context<typeof createTRPCContext>().create({
     // Enable periodic ping messages to keep connection alive
     ping: {
       enabled: true,
-      // Send ping every 15 seconds to keep connection alive
-      intervalMs: 15000,
+      // Send ping every 3 seconds to keep connection alive
+      intervalMs: 3000,
     },
     // Client-specific options
     client: {
-      // Reconnect after 5 seconds of inactivity
-      reconnectAfterInactivityMs: 5000,
+      // Reconnect after 10 seconds of inactivity
+      reconnectAfterInactivityMs: 10000,
       // Keep retrying connection
       shouldRetry: true,
       // Start with a short retry delay and increase it
