@@ -43,6 +43,12 @@ export type RouterInputs = inferRouterInputs<AppRouter>;
  */
 export type RouterOutputs = inferRouterOutputs<AppRouter>;
 
+function getBaseUrl() {
+  if (typeof window !== "undefined") return window.location.origin;
+  if (process.env.VERCEL_URL) return `https://${process.env.VERCEL_URL}`;
+  return `http://localhost:${process.env.PORT ?? 3000}`;
+}
+
 export function TRPCReactProvider(props: { children: React.ReactNode }) {
   const queryClient = getQueryClient();
   const baseUrl = getBaseUrl();
@@ -62,6 +68,16 @@ export function TRPCReactProvider(props: { children: React.ReactNode }) {
             transformer: SuperJSON,
             eventSourceOptions: () => ({
               withCredentials: true,
+              retry: true,
+              onopen: () => {
+                console.log("🔌 SSE connection opened");
+              },
+              onmessage: () => {
+                console.log("📨 SSE message received");
+              },
+              onerror: (error: Event) => {
+                console.error("❌ SSE connection error:", error);
+              },
               headers: {
                 "x-trpc-source": "nextjs-react",
               },
@@ -88,10 +104,4 @@ export function TRPCReactProvider(props: { children: React.ReactNode }) {
       </api.Provider>
     </QueryClientProvider>
   );
-}
-
-function getBaseUrl() {
-  if (typeof window !== "undefined") return window.location.origin;
-  if (process.env.VERCEL_URL) return `https://${process.env.VERCEL_URL}`;
-  return `http://localhost:${process.env.PORT ?? 3000}`;
 }
