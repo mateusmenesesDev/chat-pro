@@ -47,7 +47,7 @@ export default function ChatInterface() {
   };
 
   return (
-    <div className="flex h-screen pt-[73px]">
+    <div className="flex h-screen pt-[72px]">
       {/* Contact List - Mobile Responsive */}
       <div
         className={`bg-background/95 fixed inset-y-0 left-0 z-[99999] w-80 transform overflow-y-auto border-t border-r transition-transform duration-300 ease-in-out lg:static lg:translate-x-0 ${
