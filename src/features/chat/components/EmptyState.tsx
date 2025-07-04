@@ -1,9 +1,9 @@
 export const EmptyState = () => {
   return (
-    <div className="animate-fade-in flex h-full flex-col items-center justify-center py-16">
-      <div className="shadow-premium mb-6 flex h-20 w-20 items-center justify-center rounded-full">
+    <div className="animate-fade-in flex h-full flex-col items-center justify-center p-4 sm:py-16">
+      <div className="shadow-premium mb-4 flex h-16 w-16 items-center justify-center rounded-full sm:mb-6 sm:h-20 sm:w-20">
         <svg
-          className="text-primary-foreground h-10 w-10"
+          className="text-primary-foreground h-8 w-8 sm:h-10 sm:w-10"
           fill="none"
           stroke="currentColor"
           viewBox="0 0 24 24"
@@ -17,10 +17,11 @@ export const EmptyState = () => {
         </svg>
       </div>
 
-      <h3 className="mb-2 text-xl font-semibold">Start your conversation</h3>
-      <p className="text-muted-foreground max-w-sm text-center">
-        This is the beginning of your conversation with{" "}
-        <span className="font-medium">the ChatPro</span>. Send a message to get
+      <h3 className="mb-2 text-lg font-semibold sm:text-xl">
+        Start your conversation
+      </h3>
+      <p className="text-muted-foreground max-w-[250px] text-center text-sm sm:max-w-sm sm:text-base">
+        This is the beginning of your conversation. Send a message to get
         started!
       </p>
     </div>

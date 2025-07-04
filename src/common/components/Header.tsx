@@ -16,8 +16,8 @@ export default function Header() {
   }, []);
 
   return (
-    <header className="bg-background/80 sticky top-0 z-50 border-b backdrop-blur-md">
-      <div className="container mx-auto py-5">
+    <header className="bg-background/80 fixed inset-x-0 top-0 z-[100] border-b backdrop-blur-md">
+      <div className="container mx-auto px-3 py-5">
         <div className="flex items-center justify-between">
           {/* Left Section */}
           <div className="text-2xl font-bold">{SEO.appTitle}</div>

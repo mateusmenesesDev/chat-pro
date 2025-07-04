@@ -10,26 +10,20 @@ import {
 import { Button } from "~/common/components/ui/button";
 import { Card } from "~/common/components/ui/card";
 import { Input } from "~/common/components/ui/input";
-import { useContact } from "../hooks/useContact";
+import { useContact } from "~/features/contact/hooks/useContact";
+import type { RouterOutputs } from "~/trpc/react";
 import { AddContactDialog } from "./AddContactDialog";
 
-export function ContactList() {
-  const { contacts, isLoading, handleSelectContact, selectedContact } =
-    useContact();
+type Contact = RouterOutputs["contact"]["getContacts"][number];
+
+interface ContactListProps {
+  onContactSelect?: () => void;
+}
+
+export function ContactList({ onContactSelect }: ContactListProps) {
+  const { contacts, selectedContact, handleSelectContact } = useContact();
   const [searchQuery, setSearchQuery] = useState("");
   const [isAddContactOpen, setIsAddContactOpen] = useState(false);
-
-  if (isLoading) {
-    return (
-      <div className="flex h-full flex-col items-center justify-center">
-        <p className="text-muted-foreground">Loading contacts...</p>
-      </div>
-    );
-  }
-
-  const filteredContacts = contacts?.filter((contact) =>
-    contact?.name?.toLowerCase().includes(searchQuery.toLowerCase()),
-  );
 
   if (contacts?.length === 0) {
     return (
@@ -54,6 +48,15 @@ export function ContactList() {
       </>
     );
   }
+
+  const filteredContacts = contacts?.filter((contact) =>
+    contact?.name?.toLowerCase().includes(searchQuery.toLowerCase()),
+  );
+
+  const handleContactSelect = (contact: Contact) => {
+    handleSelectContact(contact);
+    onContactSelect?.();
+  };
 
   return (
     <>
@@ -85,7 +88,7 @@ export function ContactList() {
                   className={`hover:bg-accent mx-2 mb-1 cursor-pointer border-0 p-3 transition-colors ${
                     selectedContact?.id === contact?.id ? "bg-accent" : ""
                   }`}
-                  onClick={() => handleSelectContact(contact)}
+                  onClick={() => handleContactSelect(contact)}
                 >
                   <div className="flex items-center gap-3">
                     <Avatar className="h-10 w-10">

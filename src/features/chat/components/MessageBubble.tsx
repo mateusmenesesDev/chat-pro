@@ -1,12 +1,17 @@
 import dayjs from "dayjs";
 import relativeTime from "dayjs/plugin/relativeTime";
 import { useAuth } from "~/features/auth/hooks/useAuth";
-import type { Message } from "~/features/chat/hooks/useChat";
 
 dayjs.extend(relativeTime);
 
 interface MessageBubbleProps {
-  message: Message;
+  message: {
+    id: string;
+    content: string;
+    senderId: string;
+    sentAt: Date;
+    readAt?: Date | null;
+  };
 }
 
 export const MessageBubble = ({ message }: MessageBubbleProps) => {
@@ -16,7 +21,9 @@ export const MessageBubble = ({ message }: MessageBubbleProps) => {
 
   return (
     <div
-      className={`animate-message-in flex gap-3 ${isOwn ? "flex-row-reverse" : "flex-row"}`}
+      className={`group flex w-full gap-1 ${
+        isOwn ? "flex-row-reverse" : "flex-row"
+      }`}
     >
       {/* <Avatar className="mt-1 h-8 w-8">
         <AvatarImage src={user?.imageUrl ?? ""} alt={user?.name ?? ""} />
@@ -24,28 +31,32 @@ export const MessageBubble = ({ message }: MessageBubbleProps) => {
       </Avatar> */}
 
       <div
-        className={`flex max-w-xs flex-col lg:max-w-md ${isOwn ? "items-end" : "items-start"}`}
+        className={`flex max-w-[75%] flex-col ${
+          isOwn ? "items-end" : "items-start"
+        }`}
       >
         <div
-          className={`rounded-2xl px-4 py-3 shadow-sm ${
+          className={`rounded-2xl px-3 py-2 shadow-sm ${
             isOwn
-              ? "bg-gradient-message text-message-sent-foreground rounded-br-md"
-              : "bg-message-received text-message-received-foreground rounded-bl-md"
-          } `}
+              ? "bg-gradient-message text-message-sent-foreground rounded-br-sm"
+              : "bg-message-received text-message-received-foreground rounded-bl-sm"
+          }`}
         >
-          <p className="text-sm leading-relaxed break-words">{content}</p>
+          <p className="text-[15px] leading-relaxed break-words">{content}</p>
         </div>
 
         <div
-          className={`mt-1 flex items-center gap-2 px-1 ${isOwn ? "flex-row-reverse" : "flex-row"}`}
+          className={`mt-0.5 flex items-center gap-1 px-0.5 opacity-60 transition-opacity group-hover:opacity-100 ${
+            isOwn ? "flex-row-reverse" : "flex-row"
+          }`}
         >
-          <span className="text-muted-foreground text-xs">
+          <span className="text-muted-foreground text-[10px]">
             {dayjs(sentAt).fromNow()}
           </span>
           {isOwn && readAt && (
             <div className="flex">
               <svg
-                className="text-primary h-3 w-3"
+                className="text-primary h-2.5 w-2.5"
                 fill="currentColor"
                 viewBox="0 0 20 20"
               >
