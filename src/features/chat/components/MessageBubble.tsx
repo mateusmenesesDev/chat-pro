@@ -1,11 +1,7 @@
 import dayjs from "dayjs";
 import relativeTime from "dayjs/plugin/relativeTime";
-import {
-  Avatar,
-  AvatarFallback,
-  AvatarImage,
-} from "~/common/components/ui/avatar";
-import type { Message } from "../types/Message";
+import { useAuth } from "~/features/auth/hooks/useAuth";
+import type { Message } from "~/features/chat/hooks/useChat";
 
 dayjs.extend(relativeTime);
 
@@ -14,21 +10,18 @@ interface MessageBubbleProps {
 }
 
 export const MessageBubble = ({ message }: MessageBubbleProps) => {
-  const { text, timestamp, isOwn, user } = message;
+  const { content, sentAt, senderId, readAt } = message;
+  const { user } = useAuth();
+  const isOwn = senderId === user?.id;
 
   return (
     <div
       className={`animate-message-in flex gap-3 ${isOwn ? "flex-row-reverse" : "flex-row"}`}
     >
-      <Avatar className="mt-1 h-8 w-8">
-        <AvatarImage src={user.avatar} alt={user.name} />
-        <AvatarFallback>
-          {user.name
-            .split(" ")
-            .map((n) => n[0])
-            .join("")}
-        </AvatarFallback>
-      </Avatar>
+      {/* <Avatar className="mt-1 h-8 w-8">
+        <AvatarImage src={user?.imageUrl ?? ""} alt={user?.name ?? ""} />
+        <AvatarFallback>{user?.?.split(" ")[0]}</AvatarFallback>
+      </Avatar> */}
 
       <div
         className={`flex max-w-xs flex-col lg:max-w-md ${isOwn ? "items-end" : "items-start"}`}
@@ -40,16 +33,16 @@ export const MessageBubble = ({ message }: MessageBubbleProps) => {
               : "bg-message-received text-message-received-foreground rounded-bl-md"
           } `}
         >
-          <p className="text-sm leading-relaxed break-words">{text}</p>
+          <p className="text-sm leading-relaxed break-words">{content}</p>
         </div>
 
         <div
           className={`mt-1 flex items-center gap-2 px-1 ${isOwn ? "flex-row-reverse" : "flex-row"}`}
         >
           <span className="text-muted-foreground text-xs">
-            {dayjs(timestamp).fromNow()}
+            {dayjs(sentAt).fromNow()}
           </span>
-          {isOwn && (
+          {isOwn && readAt && (
             <div className="flex">
               <svg
                 className="text-primary h-3 w-3"

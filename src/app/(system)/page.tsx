@@ -1,61 +1,21 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import {
-  Avatar,
-  AvatarFallback,
-  AvatarImage,
-} from "~/common/components/ui/avatar";
+import { Avatar, AvatarImage } from "~/common/components/ui/avatar";
 import { Button } from "~/common/components/ui/button";
 import { Card } from "~/common/components/ui/card";
 import { Input } from "~/common/components/ui/input";
 import { EmptyState } from "~/features/chat/components/EmptyState";
 import { MessageBubble } from "~/features/chat/components/MessageBubble";
-import type { Message } from "~/features/chat/types/Message";
+import { useChat } from "~/features/chat/hooks/useChat";
 import { ContactList } from "~/features/contact/components/ContactList";
-
-// Sample contacts data
-const SAMPLE_CONTACTS = [
-  {
-    id: "1",
-    name: "ChatPro",
-    avatar: "https://api.dicebear.com/7.x/avataaars/svg?seed=alex",
-    lastMessage: "That's really interesting!",
-    lastMessageTime: new Date(),
-  },
-  {
-    id: "2",
-    name: "John Doe",
-    avatar: "https://api.dicebear.com/7.x/avataaars/svg?seed=john",
-    lastMessage: "Hey, how are you?",
-    lastMessageTime: new Date(Date.now() - 1000 * 60 * 60), // 1 hour ago
-    unreadCount: 2,
-  },
-  {
-    id: "3",
-    name: "Jane Smith",
-    avatar: "https://api.dicebear.com/7.x/avataaars/svg?seed=jane",
-    lastMessage: "See you tomorrow!",
-    lastMessageTime: new Date(Date.now() - 1000 * 60 * 120), // 2 hours ago
-  },
-];
+import { useContact } from "~/features/contact/hooks/useContact";
 
 export default function ChatInterface() {
-  const [messages, setMessages] = useState<Message[]>([]);
   const [newMessage, setNewMessage] = useState("");
-  const [isTyping, setIsTyping] = useState(false);
-  const [selectedContactId, setSelectedContactId] = useState<string>();
-  const [contacts, setContacts] = useState(SAMPLE_CONTACTS);
+  const { selectedContact } = useContact();
+  const { sendMessage, messages } = useChat();
   const messagesEndRef = useRef<HTMLDivElement>(null);
-
-  const currentUser = {
-    name: "You",
-    avatar: "https://api.dicebear.com/7.x/avataaars/svg?seed=current",
-  };
-
-  const selectedContact = contacts.find(
-    (contact) => contact.id === selectedContactId,
-  );
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -66,50 +26,13 @@ export default function ChatInterface() {
   }, [messages]);
 
   const handleSendMessage = () => {
-    if (!newMessage.trim() || !selectedContactId) return;
-
-    const message: Message = {
-      id: Date.now().toString(),
-      text: newMessage,
-      timestamp: new Date(),
-      isOwn: true,
-      user: currentUser,
-    };
-
-    setMessages((prev) => [...prev, message]);
+    void sendMessage(newMessage, selectedContact?.id ?? "");
     setNewMessage("");
-
-    // Simulate typing indicator and response
-    setIsTyping(true);
-    setTimeout(() => {
-      const responses = [
-        "That's a great point!",
-        "I completely agree with you.",
-        "Let me think about that...",
-        "Thanks for sharing that with me.",
-        "That's really interesting!",
-      ];
-
-      const response: Message = {
-        id: (Date.now() + 1).toString(),
-        text: responses[Math.floor(Math.random() * responses.length)] ?? "",
-        timestamp: new Date(),
-        isOwn: false,
-        user: {
-          name: selectedContact?.name ?? "Unknown",
-          avatar: selectedContact?.avatar ?? "",
-        },
-      };
-
-      setMessages((prev) => [...prev, response]);
-      setIsTyping(false);
-    }, 1500);
   };
 
-  const handleKeyPress = (e: React.KeyboardEvent) => {
+  const handleKeyPress = async (e: React.KeyboardEvent) => {
     if (e.key === "Enter" && !e.shiftKey) {
-      e.preventDefault();
-      handleSendMessage();
+      void handleSendMessage();
     }
   };
 
@@ -117,33 +40,24 @@ export default function ChatInterface() {
     <div className="flex h-[calc(100vh-81px)]">
       {/* Contact List */}
       <div className="w-80 border-r">
-        <ContactList
-          selectedContactId={selectedContactId}
-          onSelectContact={setSelectedContactId}
-        />
+        <ContactList />
       </div>
 
       {/* Chat Area */}
       <div className="flex flex-1 flex-col">
-        {selectedContactId ? (
+        {selectedContact ? (
           <>
             {/* Contact Header */}
             <div className="border-b p-3">
               <div className="flex items-center gap-3">
                 <Avatar>
                   <AvatarImage
-                    src={selectedContact?.avatar}
-                    alt={selectedContact?.name}
+                    src={selectedContact?.imageUrl}
+                    alt={selectedContact?.name ?? ""}
                   />
-                  <AvatarFallback>
-                    {selectedContact?.name
-                      .split(" ")
-                      .map((n) => n[0])
-                      .join("")}
-                  </AvatarFallback>
                 </Avatar>
                 <div>
-                  <h2 className="font-medium">{selectedContact?.name}</h2>
+                  <h2 className="font-medium">{selectedContact?.name ?? ""}</h2>
                 </div>
               </div>
             </div>
@@ -154,38 +68,8 @@ export default function ChatInterface() {
                 <EmptyState />
               ) : (
                 messages.map((message) => (
-                  <MessageBubble key={message.id} message={message} />
+                  <MessageBubble key={message?.id} message={message} />
                 ))
-              )}
-
-              {isTyping && (
-                <div className="animate-message-in flex items-center gap-3">
-                  <Avatar className="h-8 w-8">
-                    <AvatarImage
-                      src={selectedContact?.avatar}
-                      alt={selectedContact?.name}
-                    />
-                    <AvatarFallback>
-                      {selectedContact?.name
-                        .split(" ")
-                        .map((n) => n[0])
-                        .join("")}
-                    </AvatarFallback>
-                  </Avatar>
-                  <div className="bg-message-received text-message-received-foreground max-w-xs rounded-2xl px-4 py-3">
-                    <div className="flex space-x-1">
-                      <div className="bg-muted-foreground h-2 w-2 animate-bounce rounded-full"></div>
-                      <div
-                        className="bg-muted-foreground h-2 w-2 animate-bounce rounded-full"
-                        style={{ animationDelay: "0.1s" }}
-                      ></div>
-                      <div
-                        className="bg-muted-foreground h-2 w-2 animate-bounce rounded-full"
-                        style={{ animationDelay: "0.2s" }}
-                      ></div>
-                    </div>
-                  </div>
-                </div>
               )}
               <div ref={messagesEndRef} />
             </div>

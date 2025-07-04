@@ -1,10 +1,12 @@
 import { clerkClient } from "@clerk/nextjs/server";
 import { TRPCError } from "@trpc/server";
-import { and, eq } from "drizzle-orm";
+import { and, eq, type InferSelectModel } from "drizzle-orm";
 import { z } from "zod";
 
 import { createTRPCRouter, protectedProcedure } from "~/server/api/trpc";
 import { contacts, users } from "~/server/db/schema";
+
+type User = InferSelectModel<typeof users>;
 
 export const contactRouter = createTRPCRouter({
   createContact: protectedProcedure
@@ -74,11 +76,13 @@ export const contactRouter = createTRPCRouter({
       },
     });
 
-    const contactsWithImage = contactsResult.map((contact) => ({
-      ...contact.contact,
-      imageUrl: users.data.find((user) => user.id === contact.contact?.id)
-        ?.imageUrl,
-    }));
+    const contactsWithImage = contactsResult.map(
+      (contact: { contact: User | null }) => ({
+        ...contact.contact,
+        imageUrl: users.data.find((user) => user.id === contact.contact?.id)
+          ?.imageUrl,
+      }),
+    );
 
     return contactsWithImage;
   }),

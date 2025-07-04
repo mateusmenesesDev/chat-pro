@@ -5,6 +5,7 @@ import { Geist } from "next/font/google";
 
 import { ClerkProvider } from "@clerk/nextjs";
 import { Toaster } from "sonner";
+import { JotaiProvider } from "~/common/providers/JotaiProvider";
 import { ThemeProvider } from "~/common/providers/ThemeProvider";
 import { SEO } from "~/constants";
 import { TRPCReactProvider } from "~/trpc/react";
@@ -28,10 +29,12 @@ export default function RootLayout({
       <body>
         <ThemeProvider attribute="class" enableSystem disableTransitionOnChange>
           <ClerkProvider>
-            <TRPCReactProvider>
-              <Toaster richColors />
-              {children}
-            </TRPCReactProvider>
+            <JotaiProvider>
+              <TRPCReactProvider>
+                <Toaster richColors />
+                {children}
+              </TRPCReactProvider>
+            </JotaiProvider>
           </ClerkProvider>
         </ThemeProvider>
       </body>

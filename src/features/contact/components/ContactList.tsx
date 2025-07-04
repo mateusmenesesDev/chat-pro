@@ -13,16 +13,9 @@ import { Input } from "~/common/components/ui/input";
 import { useContact } from "../hooks/useContact";
 import { AddContactDialog } from "./AddContactDialog";
 
-interface ContactListProps {
-  selectedContactId?: string;
-  onSelectContact: (contactId: string) => void;
-}
-
-export function ContactList({
-  selectedContactId,
-  onSelectContact,
-}: ContactListProps) {
-  const { contacts, isLoading } = useContact();
+export function ContactList() {
+  const { contacts, isLoading, handleSelectContact, selectedContact } =
+    useContact();
   const [searchQuery, setSearchQuery] = useState("");
   const [isAddContactOpen, setIsAddContactOpen] = useState(false);
 
@@ -90,9 +83,9 @@ export function ContactList({
                 <Card
                   key={contact?.id}
                   className={`hover:bg-accent mx-2 mb-1 cursor-pointer border-0 p-3 transition-colors ${
-                    selectedContactId === contact?.id ? "bg-accent" : ""
+                    selectedContact?.id === contact?.id ? "bg-accent" : ""
                   }`}
-                  onClick={() => onSelectContact(contact.id ?? "")}
+                  onClick={() => handleSelectContact(contact)}
                 >
                   <div className="flex items-center gap-3">
                     <Avatar className="h-10 w-10">

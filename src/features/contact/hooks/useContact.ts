@@ -1,5 +1,10 @@
+import { atom, useAtom } from "jotai";
 import { toast } from "sonner";
+import type { RouterOutputs } from "~/trpc/react";
 import { api } from "~/trpc/react";
+
+type Contact = RouterOutputs["contact"]["getContacts"][number];
+const selectedContactAtom = atom<Contact | null>(null);
 
 export const useContact = () => {
   const utils = api.useUtils();
@@ -14,5 +19,17 @@ export const useContact = () => {
     },
   });
 
-  return { contacts, isLoading, createContact };
+  const [selectedContact, setSelectedContact] = useAtom(selectedContactAtom);
+
+  const handleSelectContact = (contact: Contact) => {
+    setSelectedContact(contact);
+  };
+
+  return {
+    contacts,
+    isLoading,
+    createContact,
+    selectedContact,
+    handleSelectContact,
+  };
 };
