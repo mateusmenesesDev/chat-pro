@@ -8,10 +8,13 @@ import { Input } from "~/common/components/ui/input";
 import { EmptyState } from "~/features/chat/components/EmptyState";
 import { MessageBubble } from "~/features/chat/components/MessageBubble";
 import { useChat } from "~/features/chat/hooks/useChat";
+import { useChatSubscription } from "~/features/chat/hooks/useChatSubscription";
 import { ContactList } from "~/features/contact/components/ContactList";
 import { useContact } from "~/features/contact/hooks/useContact";
 
 export default function ChatInterface() {
+  useChatSubscription(); // Global subscription
+
   const [newMessage, setNewMessage] = useState("");
   const { selectedContact } = useContact();
   const { sendMessage, messages } = useChat();

@@ -62,6 +62,17 @@ export const messageRouter = createTRPCRouter({
         const { message: content, recipientId, conversationId } = input;
         const { userId } = ctx.session;
 
+        // Create message data early
+        const messageData = {
+          id: nanoid(),
+          conversationId: "", // Will be set after conversation is created/found
+          senderId: userId,
+          content,
+          sentAt: new Date(),
+          readAt: null,
+        } satisfies Partial<Message>;
+
+        // Get or create conversation
         let conversationToUse = conversationId;
         if (!conversationToUse) {
           const conversation = await db.query.conversations.findFirst({
@@ -97,15 +108,20 @@ export const messageRouter = createTRPCRouter({
           }
         }
 
-        const messageData = {
-          id: nanoid(),
-          conversationId: conversationToUse,
-          senderId: userId,
-          content,
-          sentAt: new Date(),
-          readAt: null,
-        } satisfies Message;
+        // Update message data with conversation ID
+        messageData.conversationId = conversationToUse;
 
+        // Notify subscribers immediately with the message data
+        const listeners = messageEvents.get("global");
+        if (listeners) {
+          queueMicrotask(() => {
+            for (const listener of listeners) {
+              listener(messageData as Message);
+            }
+          });
+        }
+
+        // Save message to DB
         const [createdMessage] = await db
           .insert(messages)
           .values(messageData)
@@ -118,20 +134,13 @@ export const messageRouter = createTRPCRouter({
           });
         }
 
+        // Update conversation's lastMessageAt
         await db
           .update(conversations)
           .set({ lastMessageAt: new Date() })
           .where(eq(conversations.id, conversationToUse));
 
-        // Notify all listeners
-        const listeners = messageEvents.get("global");
-        if (listeners) {
-          for (const listener of listeners) {
-            listener(messageData);
-          }
-        }
-
-        return messageData;
+        return createdMessage;
       } catch (error) {
         if (error instanceof TRPCError) throw error;
         throw new TRPCError({
