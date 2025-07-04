@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { useContact } from "~/features/contact/hooks/useContact";
 import { api } from "~/trpc/react";
 
@@ -14,16 +14,24 @@ export type Message = {
 export function useChat() {
   const [messages, setMessages] = useState<Message[]>([]);
   const { selectedContact } = useContact();
+  const utils = api.useUtils();
+  // Track processed message IDs to avoid duplicates
+  const processedMessageIds = useRef(new Set<string>());
 
   const { data: conversation, isLoading: isLoadingMessages } =
     api.message.getByConversationByContactId.useQuery(
       { contactId: selectedContact?.id ?? "" },
-      { enabled: !!selectedContact?.id },
+      {
+        enabled: !!selectedContact?.id,
+        // Keep cache fresh
+        refetchInterval: 30000,
+      },
     );
 
+  // Subscribe to new messages
   api.message.onNewMessage.useSubscription(undefined, {
     onStarted() {
-      console.log("🔌 [useChat] WebSocket connection started");
+      console.log("🔌 SSE connection opened");
     },
     onData(newMsg: unknown) {
       if (!newMsg) return;
@@ -35,27 +43,31 @@ export function useChat() {
 
       if (conversation?.id && message.conversationId === conversation.id) {
         setMessages((prev) => {
-          const messageExists = prev.some((msg) => msg.id === message.id);
-          if (messageExists) {
-            console.log("🔄 [useChat] Message already exists, skipping");
+          // Check both state and ref for duplicates
+          if (processedMessageIds.current.has(message.id)) {
             return prev;
           }
 
+          // Add to processed set
+          processedMessageIds.current.add(message.id);
+
+          // Sort messages by sentAt to maintain chronological order
           const newMessages = [...prev, message].sort(
             (a, b) =>
               new Date(a.sentAt).getTime() - new Date(b.sentAt).getTime(),
           );
 
-          console.log("📝 [useChat] Updating messages:", {
-            previous: prev.length,
-            new: newMessages.length,
-          });
           return newMessages;
+        });
+
+        // Invalidate the query to ensure we have the latest data
+        void utils.message.getByConversationByContactId.invalidate({
+          contactId: selectedContact?.id ?? "",
         });
       }
     },
     onError(err) {
-      console.error("❌ [useChat] WebSocket subscription error:", err);
+      console.error("❌ SSE connection error:", err);
     },
   });
 
@@ -63,29 +75,34 @@ export function useChat() {
   useEffect(() => {
     if (!conversation) {
       setMessages([]);
+      processedMessageIds.current.clear();
       return;
     }
 
+    // Sort messages by sentAt to maintain chronological order
     const sortedMessages = [...conversation.messages].sort(
       (a, b) => new Date(a.sentAt).getTime() - new Date(b.sentAt).getTime(),
     );
 
+    // Update processed message IDs
+    processedMessageIds.current = new Set(sortedMessages.map((msg) => msg.id));
     setMessages(sortedMessages);
   }, [conversation]);
 
-  const sendMessageMutation = api.message.send.useMutation();
+  const sendMessageMutation = api.message.send.useMutation({
+    onSuccess: () => {
+      // Invalidate queries to trigger a refresh
+      void utils.message.getByConversationByContactId.invalidate({
+        contactId: selectedContact?.id ?? "",
+      });
+    },
+  });
 
   const sendMessage = useCallback(
     async (content: string, recipientId: string) => {
       if (!content.trim()) return;
 
       try {
-        console.log("📤 [useChat] Sending message:", {
-          content,
-          recipientId,
-          conversationId: conversation?.id,
-        });
-
         const sent = await sendMessageMutation.mutateAsync({
           message: content,
           recipientId,
@@ -94,10 +111,15 @@ export function useChat() {
 
         if (sent) {
           setMessages((prev) => {
-            if (prev.some((msg) => msg.id === sent.id)) {
+            // Check both state and ref for duplicates
+            if (processedMessageIds.current.has(sent.id)) {
               return prev;
             }
 
+            // Add to processed set
+            processedMessageIds.current.add(sent.id);
+
+            // Add new message and sort by sentAt
             const newMessages = [...prev, sent].sort(
               (a, b) =>
                 new Date(a.sentAt).getTime() - new Date(b.sentAt).getTime(),
@@ -108,10 +130,10 @@ export function useChat() {
 
         return sent;
       } catch {
-        console.error("❌ [useChat] Failed to send message:");
+        console.error("❌ Failed to send message");
       }
     },
-    [sendMessageMutation, conversation?.id],
+    [sendMessageMutation, conversation?.id, selectedContact?.id],
   );
 
   return {
