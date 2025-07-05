@@ -69,6 +69,19 @@ export function TRPCReactProvider(props: { children: React.ReactNode }) {
             eventSourceOptions: () => ({
               withCredentials: true,
               retry: true,
+              onopen: () => {
+                console.log("🔌 SSE connection opened");
+              },
+              onmessage: () => {
+                console.log("📨 SSE message received");
+              },
+              onerror: (error: Event) => {
+                console.error("❌ SSE connection error:", error);
+                setTimeout(() => {
+                  console.log("🔄 Attempting to reconnect SSE...");
+                }, 5000);
+              },
+
               headers: {
                 "x-trpc-source": "nextjs-react",
               },

@@ -7,6 +7,10 @@ export function useChatSubscription() {
   const setMessages = useSetAtom(messagesAtom);
 
   api.message.onNewMessage.useSubscription(undefined, {
+    onStarted() {
+      console.log("✅ Global subscription ativa");
+    },
+
     onData(newMsg) {
       const typedMsg = newMsg as { type: string; message?: Message };
       if (typedMsg.type !== "message" || !typedMsg.message) return;
