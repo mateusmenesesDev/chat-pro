@@ -11,9 +11,6 @@ import {
 import { db } from "~/server/db";
 import { conversations, messages } from "~/server/db/schema";
 
-// Set max listeners to avoid memory leaks
-const MAX_LISTENERS = 20;
-
 type Message = InferSelectModel<typeof messages>;
 
 interface MessageEvent {
@@ -25,29 +22,33 @@ interface MessageEvent {
 const messageEvents = new Map<string, Set<(message: Message) => void>>();
 
 export const messageRouter = createTRPCRouter({
-  onNewMessage: publicProcedure.subscription(() => {
-    return observable<MessageEvent>((emit: Observer<MessageEvent, unknown>) => {
-      const onMessage = (message: Message) => {
-        emit.next({ type: "message", message });
-      };
+  onNewMessage: publicProcedure
+    .input(z.object({ conversationId: z.string().optional() }))
+    .subscription(() => {
+      return observable<MessageEvent>(
+        (emit: Observer<MessageEvent, unknown>) => {
+          const onMessage = (message: Message) => {
+            emit.next({ type: "message", message });
+          };
 
-      const listeners = messageEvents.get("global") ?? new Set();
-      listeners.add(onMessage);
-      messageEvents.set("global", listeners);
+          const listeners = messageEvents.get("global") ?? new Set();
+          listeners.add(onMessage);
+          messageEvents.set("global", listeners);
 
-      emit.next({ type: "state", state: "connected" });
+          emit.next({ type: "state", state: "connected" });
 
-      return () => {
-        const listeners = messageEvents.get("global");
-        if (listeners) {
-          listeners.delete(onMessage);
-          if (listeners.size === 0) {
-            messageEvents.delete("global");
-          }
-        }
-      };
-    });
-  }),
+          return () => {
+            const listeners = messageEvents.get("global");
+            if (listeners) {
+              listeners.delete(onMessage);
+              if (listeners.size === 0) {
+                messageEvents.delete("global");
+              }
+            }
+          };
+        },
+      );
+    }),
 
   send: protectedProcedure
     .input(
