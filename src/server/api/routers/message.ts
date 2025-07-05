@@ -63,17 +63,15 @@ export const messageRouter = createTRPCRouter({
         const { message: content, recipientId, conversationId } = input;
         const { userId } = ctx.session;
 
-        // Create message data early
         const messageData = {
           id: nanoid(),
-          conversationId: "", // Will be set after conversation is created/found
+          conversationId: "",
           senderId: userId,
           content,
           sentAt: new Date(),
           readAt: null,
         } satisfies Partial<Message>;
 
-        // Get or create conversation
         let conversationToUse = conversationId;
         if (!conversationToUse) {
           const conversation = await db.query.conversations.findFirst({
@@ -109,10 +107,8 @@ export const messageRouter = createTRPCRouter({
           }
         }
 
-        // Update message data with conversation ID
         messageData.conversationId = conversationToUse;
 
-        // Notify subscribers immediately with the message data
         const listeners = messageEvents.get("global");
         if (listeners) {
           queueMicrotask(() => {
@@ -122,7 +118,6 @@ export const messageRouter = createTRPCRouter({
           });
         }
 
-        // Save message to DB
         const [createdMessage] = await db
           .insert(messages)
           .values(messageData)
@@ -135,7 +130,6 @@ export const messageRouter = createTRPCRouter({
           });
         }
 
-        // Update conversation's lastMessageAt
         await db
           .update(conversations)
           .set({ lastMessageAt: new Date() })

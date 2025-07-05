@@ -24,17 +24,14 @@ export function useChat() {
       { enabled: !!selectedContact?.id },
     );
 
-  // Initialize messages when conversation loads
   useEffect(() => {
     if (!conversation?.id || !conversation.messages) return;
 
     setAllMessages((prev) => {
       const current = prev.get(conversation.id) ?? [];
 
-      // Merge existing messages with new ones from conversation
       const merged = [...current, ...conversation.messages];
 
-      // Remove duplicates and sort
       const unique = Array.from(
         new Map(merged.map((msg) => [msg.id, msg])).values(),
       ).sort(
