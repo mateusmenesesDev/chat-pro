@@ -53,23 +53,18 @@ export default function ChatInterface() {
         className={`bg-background/95 fixed inset-y-0 left-0 z-[99999] w-80 transform overflow-y-auto border-t border-r transition-transform duration-300 ease-in-out lg:static lg:translate-x-0 ${
           isMobileMenuOpen ? "translate-x-0" : "-translate-x-full"
         }`}
-        style={{ top: "72px", height: "calc(100vh - 72px)" }}
       >
         <ContactList onContactSelect={() => setIsMobileMenuOpen(false)} />
       </div>
 
       {/* Main Chat Container */}
       <div className="flex flex-1 flex-col">
-        {/* Mobile Header */}
-        <div
-          className="bg-background fixed inset-x-0 z-[90] border-b lg:hidden"
-          style={{ top: "72px" }}
-        >
-          <div className="flex items-center px-3 py-2">
+        <div className="bg-background w-full border-b border-l p-3">
+          <div className="flex items-center gap-3">
             <Button
               variant="ghost"
               size="icon"
-              className="h-8 w-8 shrink-0"
+              className="h-8 w-8 shrink-0 lg:hidden"
               onClick={toggleMobileMenu}
             >
               {isMobileMenuOpen ? (
@@ -78,25 +73,6 @@ export default function ChatInterface() {
                 <Menu className="h-4 w-4" />
               )}
             </Button>
-            {selectedContact && (
-              <div className="ml-3 flex items-center gap-2">
-                <Avatar className="h-6 w-6">
-                  <AvatarImage
-                    src={selectedContact?.imageUrl}
-                    alt={selectedContact?.name ?? ""}
-                  />
-                </Avatar>
-                <span className="text-sm font-medium">
-                  {selectedContact?.name}
-                </span>
-              </div>
-            )}
-          </div>
-        </div>
-
-        {/* Desktop Header */}
-        <div className="bg-background fixed hidden w-full border-b border-l p-3 lg:block">
-          <div className="flex items-center gap-3">
             <Avatar>
               <AvatarImage
                 src={selectedContact?.imageUrl}
@@ -109,18 +85,10 @@ export default function ChatInterface() {
           </div>
         </div>
 
-        {/* Chat Content */}
         <div className="flex flex-1 flex-col overflow-auto">
           {selectedContact ? (
             <>
-              {/* Messages Area */}
-              <div
-                className="flex-1 overflow-y-auto"
-                style={{
-                  height: "calc(100vh - 73px - 65px - 49px)", // viewport - main header - input - mobile header
-                  marginTop: "49px", // mobile header height
-                }}
-              >
+              <div className="flex-1">
                 <div className="flex min-h-full flex-col justify-end space-y-3 p-4">
                   {messages.length === 0 ? (
                     <EmptyState />
@@ -132,8 +100,6 @@ export default function ChatInterface() {
                   <div ref={messagesEndRef} />
                 </div>
               </div>
-
-              {/* Message Input */}
             </>
           ) : (
             <div className="flex h-full items-center justify-center p-4">
