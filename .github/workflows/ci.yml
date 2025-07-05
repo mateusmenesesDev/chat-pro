@@ -10,6 +10,13 @@ jobs:
   lint-and-build:
     name: Lint and Build Check
     runs-on: ubuntu-latest
+    env:
+      DATABASE_URL: ${{ secrets.DATABASE_URL }}
+      CLERK_SECRET_KEY: ${{ secrets.CLERK_SECRET_KEY }}
+      CLERK_WEBHOOK_SIGNING_SECRET: ${{ secrets.CLERK_WEBHOOK_SIGNING_SECRET }}
+      NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY: ${{ secrets.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY }}
+      # For CI, we can skip actual env validation since we're just checking types and linting
+      SKIP_ENV_VALIDATION: "true"
 
     steps:
       - name: Checkout code
