@@ -92,7 +92,11 @@ export default function ChatInterface() {
           {selectedContact ? (
             <>
               <div className="flex-1">
-                <div className="flex min-h-full flex-col justify-end space-y-3 p-4">
+                <div
+                  className={`flex min-h-full flex-col space-y-3 p-4 ${
+                    messages.length === 0 ? "justify-center" : "justify-end"
+                  }`}
+                >
                   {messages.length === 0 ? (
                     <EmptyState />
                   ) : (

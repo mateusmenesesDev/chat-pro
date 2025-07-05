@@ -3,7 +3,7 @@ export const EmptyState = () => {
     <div className="animate-fade-in flex h-full flex-col items-center justify-center p-4 sm:py-16">
       <div className="shadow-premium mb-4 flex h-16 w-16 items-center justify-center rounded-full sm:mb-6 sm:h-20 sm:w-20">
         <svg
-          className="text-primary-foreground h-8 w-8 sm:h-10 sm:w-10"
+          className="text-primary h-8 w-8 sm:h-10 sm:w-10"
           fill="none"
           stroke="currentColor"
           viewBox="0 0 24 24"
