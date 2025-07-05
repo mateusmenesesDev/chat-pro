@@ -23,7 +23,7 @@ const messageEvents = new Map<string, Set<(message: Message) => void>>();
 
 export const messageRouter = createTRPCRouter({
   onNewMessage: publicProcedure
-    .input(z.object({ conversationId: z.string().optional() }))
+    .input(z.object({ conversationId: z.string() }).partial())
     .subscription(() => {
       return observable<MessageEvent>(
         (emit: Observer<MessageEvent, unknown>) => {
