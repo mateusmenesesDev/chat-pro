@@ -7,7 +7,7 @@ export function useChatSubscription() {
   const setMessages = useSetAtom(messagesAtom);
 
   api.message.onNewMessage.useSubscription(
-    { conversationId: undefined },
+    {},
     {
       onStarted() {
         console.log("✅ Global subscription ativa");
