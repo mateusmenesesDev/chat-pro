@@ -5,6 +5,7 @@ import { useEffect, useRef, useState } from "react";
 import { Avatar, AvatarImage } from "~/common/components/ui/avatar";
 import { Button } from "~/common/components/ui/button";
 import { Input } from "~/common/components/ui/input";
+import { useAuth } from "~/features/auth/hooks/useAuth";
 import { EmptyState } from "~/features/chat/components/EmptyState";
 import { MessageBubble } from "~/features/chat/components/MessageBubble";
 import { useChat } from "~/features/chat/hooks/useChat";
@@ -20,6 +21,8 @@ export default function ChatInterface() {
   const { selectedContact } = useContact();
   const { sendMessage, messages } = useChat();
   const messagesEndRef = useRef<HTMLDivElement>(null);
+
+  const { user } = useAuth();
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -94,7 +97,20 @@ export default function ChatInterface() {
                     <EmptyState />
                   ) : (
                     messages.map((message) => (
-                      <MessageBubble key={message?.id} message={message} />
+                      <MessageBubble
+                        key={message?.id}
+                        message={{
+                          ...message,
+                          sender: {
+                            id: message.senderId,
+                            name: message.senderId,
+                            imageUrl:
+                              message.senderId === user?.id
+                                ? user?.imageUrl
+                                : (selectedContact?.imageUrl ?? ""),
+                          },
+                        }}
+                      />
                     ))
                   )}
                   <div ref={messagesEndRef} />

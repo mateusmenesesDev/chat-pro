@@ -1,5 +1,10 @@
 import dayjs from "dayjs";
 import relativeTime from "dayjs/plugin/relativeTime";
+import {
+  Avatar,
+  AvatarFallback,
+  AvatarImage,
+} from "~/common/components/ui/avatar";
 import { useAuth } from "~/features/auth/hooks/useAuth";
 
 dayjs.extend(relativeTime);
@@ -11,24 +16,29 @@ interface MessageBubbleProps {
     senderId: string;
     sentAt: Date;
     readAt?: Date | null;
+    sender: {
+      id: string;
+      name: string;
+      imageUrl: string;
+    };
   };
 }
 
 export const MessageBubble = ({ message }: MessageBubbleProps) => {
-  const { content, sentAt, senderId, readAt } = message;
+  const { content, sentAt, senderId, readAt, sender } = message;
   const { user } = useAuth();
   const isOwn = senderId === user?.id;
 
   return (
     <div
-      className={`group flex w-full gap-1 ${
+      className={`group flex w-full gap-3 ${
         isOwn ? "flex-row-reverse" : "flex-row"
       }`}
     >
-      {/* <Avatar className="mt-1 h-8 w-8">
-        <AvatarImage src={user?.imageUrl ?? ""} alt={user?.name ?? ""} />
-        <AvatarFallback>{user?.?.split(" ")[0]}</AvatarFallback>
-      </Avatar> */}
+      <Avatar className="mt-1 h-8 w-8">
+        <AvatarImage src={sender?.imageUrl ?? ""} alt={sender?.name ?? ""} />
+        <AvatarFallback>{sender?.name?.split(" ")[0]}</AvatarFallback>
+      </Avatar>
 
       <div
         className={`flex max-w-[75%] flex-col ${
@@ -38,7 +48,7 @@ export const MessageBubble = ({ message }: MessageBubbleProps) => {
         <div
           className={`rounded-2xl px-3 py-2 shadow-sm ${
             isOwn
-              ? "bg-gradient-message text-message-sent-foreground rounded-br-sm"
+              ? "bg-message-sent text-message-sent-foreground rounded-br-sm"
               : "bg-message-received text-message-received-foreground rounded-bl-sm"
           }`}
         >
